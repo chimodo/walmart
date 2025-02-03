@@ -21,11 +21,15 @@ stock = [
 cart = [
     #{"index":1, "name":"Waffle Maker", "price":56.99, "quantity": 2}
 ]
+in_cart = False
+adding_item = False
 
 def shop():
     # display items
     while True:
-        display_items()
+        if not in_cart:
+            display_items()
+
         choice = input("Enter item index to select item\nEnter 'c' to view cart or 'p' to proceed to checkout: ")
 
         # check for item adding or opening cart
@@ -55,6 +59,8 @@ def shop():
 # Adding item to the cart
 def add_item(index):
     global cash
+    global adding_item
+    adding_item = True
 
     item = stock[index]
     price_with_tax = item["price"] + calculate_tax(item["price"])
@@ -65,11 +71,15 @@ def add_item(index):
         for cart_item in cart:
             if cart_item["index"] == item["index"]:
                 cart_item["quantity"] += 1
+                
                 return
         
         cart.append({"index": index, "name": item["name"], "price": item["price"], "quantity": 1})
+        if input("Item added to cart. Press enter to continue") == "":
+            adding_item = False
     else:
         print(f"Sorry, you don't have enough money to add {item['name']} to your cart.")
+        adding_item = False
 
 #calculating tax
 def calculate_tax(price):
@@ -95,9 +105,27 @@ def checkout():
 
 def view_cart():
     # iterate through the array and print the cart items in a table format
-    pass
+    global in_cart
+    in_cart = True
+    # iterate through the array and print the cart items in a table format
+    
+    print("\nYour Cart:")
+    for item in cart:
+        total_price = (item["price"] + calculate_tax(item["price"])) * item["quantity"]
+        print(f"{item['name']} x{item['quantity']} - ${total_price:.2f}")
+    print(f"Remaining Budget: ${cash:.2f}\n")
+
+    if input("Press enter to exit cart") == "":
+        in_cart = False
 
 def display_receipt():
+    print("\nReceipt:")
+    for item in cart:
+        print(f"{item['name']} x{item['quantity']} - ${item['price'] * item['quantity']:.2f}")
+    
+    total_before_tax = sum(item["price"] * item["quantity"] for item in cart)
+    total_tax = sum(calculate_tax(item["price"]) * item["quantity"] for item in cart)
+    total_after_tax = total_before_tax + total_tax
     # show items with tax added. for each item multiply the price by the count 
     # if an item is $10 and you bought 3
 
